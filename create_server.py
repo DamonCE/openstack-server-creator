@@ -52,10 +52,10 @@ keypair = "openstack"
 
 # Create server
 print(f"Start building instance with {image.name}")
-newServer = nova.servers.create(name=name, image=image, flavor=flavor, nics=nics, key_name=keypair)
+new_server = nova.servers.create(name=name, image=image, flavor=flavor, nics=nics, key_name=keypair)
 
 # Get data of the new server
-instance = nova.servers.get(newServer.id)
+instance = nova.servers.get(new_server.id)
 
 # While instance is building
 while instance.status == "BUILD":
