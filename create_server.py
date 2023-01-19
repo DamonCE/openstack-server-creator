@@ -29,9 +29,28 @@ while True:
 # Select chosen image
 image = images[choice]
 
+
 # Select flavor (atm Standard 1GB)
 flavors = nova.flavors.list()
+number = 0
+print("Choose a flavor")
 flavor = flavors[0]
+for flavor in flavors:
+    print(f"{number} - {flavor.name}")
+    number += 1
+
+# Get user input for the choice
+while True:
+    try:
+        choice = int(input("Enter the number of the Flavor you would like to choose: "))
+        assert 0 <= choice < number
+        break
+    except (ValueError, AssertionError):
+        print("This is not a valid option")
+
+# Select chosen image
+flavor = flavors[choice]
+
 
 # Create empty list of nics
 nics = []
