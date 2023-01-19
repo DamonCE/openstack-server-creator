@@ -1,0 +1,11 @@
+[NOVA]
+version = #
+username = #
+password = #
+project_id = #
+auth_url = #
+project_domain_id = #
+user_domain_id = #
+
+[DEFAULT_SERVER_CONFIG]
+host_domain = #
