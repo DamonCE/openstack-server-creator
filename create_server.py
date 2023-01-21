@@ -1,4 +1,4 @@
-from lib.clients.novaclient import nova
+from lib.clients.openstackclient import openstack
 from lib.utils.common_functions import wait
 from lib.utils.config import default_server_config
 
@@ -7,8 +7,8 @@ name = input("Choose the hostname\n")
 name = f"{name}.{default_server_config['host_domain']}"
 
 # Choose image
-# Get images from glance
-images = nova.glance.list()
+# Get images openstack
+images = openstack.list_images()
 number = 0
 print("Choose an Operating System")
 
@@ -27,14 +27,12 @@ while True:
         print("This is not a valid option")
 
 # Select chosen image
-image = images[choice]
-
+image = images[choice].id
 
 # Select flavor (atm Standard 1GB)
-flavors = nova.flavors.list()
+flavors = openstack.list_flavors()
 number = 0
 print("Choose a flavor")
-flavor = flavors[0]
 for flavor in flavors:
     print(f"{number} - {flavor.name}")
     number += 1
@@ -49,18 +47,34 @@ while True:
         print("This is not a valid option")
 
 # Select chosen image
-flavor = flavors[choice]
+flavor = flavors[choice].id
 
 
 # Create empty list of nics
 nics = []
 
-# Retrieve network from neutron with name
-network = nova.neutron.find_network("net-public")
+networks = openstack.list_networks()
+number = 0
+print("Choose the primary network")
+for network in networks:
+    print(f"{number} - {network.name}")
+    number += 1
+
+# Get user input for the choice
+while True:
+    try:
+        choice = int(input("Enter the number of the network you would like to choose: "))
+        assert 0 <= choice < number
+        break
+    except (ValueError, AssertionError):
+        print("This is not a valid option")
+
+# Select chosen image
+network = networks[choice].id
 
 # Put id into nic dict
 nic = {
-    "net-id": network.id
+    "net-id": network
 }
 
 # Append nic config to list of nics
@@ -70,15 +84,15 @@ nics.append(nic)
 keypair = "openstack"
 
 # Create server
-print(f"Start building instance with {image.name}")
-new_server = nova.servers.create(name=name, image=image, flavor=flavor, nics=nics, key_name=keypair)
+print(f"Start building instance")
+new_server = openstack.create_server(name=name, image=image, flavor=flavor, nics=nics, key_name=keypair)
 
 # Get data of the new server
-instance = nova.servers.get(new_server.id)
+instance = openstack.get_server_by_id(new_server.id)
 
 # While instance is building
 while instance.status == "BUILD":
-    instance = nova.servers.get(instance.id)
+    instance = openstack.get_server_by_id(instance.id)
     print("Instance is building...")
     wait()
 print("Instance is done building")
